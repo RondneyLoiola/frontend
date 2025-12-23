@@ -1,0 +1,46 @@
+.container {
+    width: 80px;
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    background-color: var(--black-blue);
+}
+
+.container img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.container .links {
+    margin-top: 46px;
+}
+
+.container .links a {
+    text-decoration: none;
+}
+
+.container .links a svg {
+    width: 32px;
+    height: 32px;
+    fill: var(--white);
+    transition: fill 0.1s;
+}
+
+.container .links a:hover svg{
+    fill: var(--info);
+}
+
+.container .signout {
+    margin-top: auto;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    fill: var(--error);
+    transition: fill 0.1s;
+}
+
+.container .signout:hover {
+    fill: var(--error-hover);
+}

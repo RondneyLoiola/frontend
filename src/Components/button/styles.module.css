@@ -1,0 +1,18 @@
+button {
+    background-color: var(--info);
+    color: #fff;
+    border: 0;
+    font-size: 16px;
+    height: 36px;
+    width: 100%;
+    border-radius: 4px;
+    transition: background-color 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+button:hover {
+    background-color: var(--info-hover);
+}
