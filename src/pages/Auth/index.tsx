@@ -1,15 +1,15 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: useEffect */
 
-import axios from 'axios';
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router';
+import api from '../../services/api';
 import styles from './styles.module.css';
 
 function Auth() {
 	const [searchParams] = useSearchParams(); // pega os parametros da url
 
 	async function getUserInfo() {
-		const { data } = await axios.get('http://localhost:4000/auth/callback', {
+		const { data } = await api.get('/auth/callback', {
 			params: {
 				code: searchParams.get('code'),
 			},
@@ -20,7 +20,7 @@ function Auth() {
 
 	useEffect(() => {
 		getUserInfo();
-	}, [getUserInfo]);
+	}, []);
 
 	return (
 		<div className={styles.container}>

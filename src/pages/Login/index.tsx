@@ -1,11 +1,11 @@
 import { GithubLogoIcon } from '@phosphor-icons/react';
-import axios from 'axios';
 import Button from '../../Components/button';
+import api from '../../services/api';
 import styles from './styles.module.css';
 
 function Login() {
 	async function handleAuth() {
-		const { data } = await axios.get('http://localhost:4000/auth');
+		const { data } = await api.get('/auth');
 
 		window.location.href = data.redirectUrl;
 	}
