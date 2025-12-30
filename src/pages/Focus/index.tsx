@@ -1,5 +1,7 @@
 import { PlusIcon } from '@phosphor-icons/react';
+import dayjs from 'dayjs';
 import { useRef, useState } from 'react';
+import { useTimer } from 'react-timer-hook';
 import Button from '../../Components/Button';
 import Header from '../../Components/Header';
 import styles from './styles.module.css';
@@ -20,6 +22,39 @@ function Focus() {
 	const restInput = useRef<HTMLInputElement>(null);
 	const [timers, setTimers] = useState<Timers>({ focus: 0, rest: 0 });
 	const [timerState, setTimerState] = useState(TimerState.PAUSED);
+	const [timeFrom, setTimeFrom] = useState<Date | null>(null);
+
+	function addSeconds(date: Date, seconds: number) {
+		const time = dayjs(date).add(seconds, 'seconds');
+
+		return time.toDate();
+	}
+
+	function handleStart() {
+		const now = new Date();
+
+		focusTimer.restart(addSeconds(now, timers.focus * 60));
+
+		setTimeFrom(now);
+	}
+
+	function handleEnd() {
+		console.log({
+			timeFrom: timeFrom?.toISOString(),
+			timeTo: new Date().toISOString(),
+		})
+
+		setTimeFrom(null);
+	}
+
+	const focusTimer = useTimer({
+		expiryTimestamp: new Date(),
+		onExpire: () => {
+			if (timerState === TimerState.PAUSED) {
+				console.log('Expirou');
+			}
+		},
+	});
 
 	function handleAddMinutes(type: 'focus' | 'rest') {
 		if (type === 'focus') {
@@ -69,14 +104,20 @@ function Focus() {
 	}
 
 	function handleFocus() {
+		handleStart();
+
 		setTimerState(TimerState.FOCUS);
 	}
 
 	function handleRest() {
+		handleEnd();
+
 		setTimerState(TimerState.REST);
 	}
 
 	function handleResume() {
+		handleStart();
+
 		setTimerState(TimerState.FOCUS);
 	}
 
@@ -107,7 +148,13 @@ function Focus() {
 				</div>
 
 				<div className={styles.timer}>
-					<span>25:00</span>
+					{timerState === TimerState.PAUSED && (
+						<span>{`${String(timers.focus).padStart(2, '0')}:00`}</span>
+					)}
+
+					{timerState === TimerState.FOCUS && (
+						<span>{`${String(focusTimer.minutes).padStart(2, '0')}:${String(focusTimer.seconds).padStart(2, '0')}`}</span>
+					)}
 				</div>
 
 				<div className={styles.buttonGroup}>
