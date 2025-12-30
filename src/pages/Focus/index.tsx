@@ -4,8 +4,8 @@ import { useRef, useState } from 'react';
 import { useTimer } from 'react-timer-hook';
 import Button from '../../Components/Button';
 import Header from '../../Components/Header';
-import styles from './styles.module.css';
 import api from '../../services/api';
+import styles from './styles.module.css';
 
 type Timers = {
 	focus: number;
@@ -22,7 +22,7 @@ const timerStateTitle = {
 	[TimerState.PAUSED]: 'Pausado',
 	[TimerState.FOCUS]: 'Foco',
 	[TimerState.REST]: 'Descanso',
-}
+};
 
 function Focus() {
 	const focusInput = useRef<HTMLInputElement>(null);
@@ -53,7 +53,7 @@ function Focus() {
 		await api.post('/focus-time', {
 			timeFrom: timeFrom?.toISOString(),
 			timeTo: new Date().toISOString(),
-		})
+		});
 
 		setTimeFrom(null);
 	}
@@ -64,7 +64,7 @@ function Focus() {
 			if (timerState === TimerState.PAUSED) {
 				await handleEnd();
 			}
-		}
+		},
 	});
 
 	const restTimer = useTimer({

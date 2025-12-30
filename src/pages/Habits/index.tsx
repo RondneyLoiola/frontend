@@ -1,8 +1,11 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: useEffect */
+
+import { Calendar } from '@mantine/dates';
 import { PaperPlaneRightIcon, TrashIcon } from '@phosphor-icons/react';
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 import Header from '../../Components/Header';
+import Info from '../../Components/Info';
 import api from '../../services/api';
 import styles from './styles.module.css';
 
@@ -61,7 +64,7 @@ function Habits() {
 	return (
 		<div className={styles.container}>
 			<div className={styles.content}>
-				<Header title='Hábitos Diários'/>
+				<Header title="Hábitos Diários" />
 				<div className={styles.input}>
 					<input
 						ref={nameInput}
@@ -84,6 +87,19 @@ function Habits() {
 							</div>
 						</div>
 					))}
+				</div>
+			</div>
+
+			<div className={styles.metrics}>
+				<h2>Camila te amo</h2>
+
+				<div className={styles.infoContainer}>
+					<Info value="23/31" label="Dias concluídos" />
+					<Info value="70%" label="Porcentagem" />
+				</div>
+
+				<div className={styles.calendarContainer}>
+					<Calendar />
 				</div>
 			</div>
 		</div>
