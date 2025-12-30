@@ -34,53 +34,56 @@ function Focus() {
 	function addSeconds(date: Date, seconds: number) {
 		const time = dayjs(date).add(seconds, 'seconds');
 
-		return time.toDate();
+		return time.toDate(); // transforma em data com os segundos adicionados
 	}
 
 	function handleStart() {
 		restTimer.pause();
 
-		const now = new Date();
+		const now = new Date(); // pega a data e hora atual
 
-		focusTimer.restart(addSeconds(now, timers.focus * 60));
+		focusTimer.restart(addSeconds(now, timers.focus * 60)); //
 
-		setTimeFrom(now);
+		setTimeFrom(now); // armazena a data e hora atual
 	}
 
 	async function handleEnd() {
-		focusTimer.pause();
+		//finaliza e manda os dados pro backend
+		focusTimer.pause(); // pausa o timer
 
 		await api.post('/focus-time', {
 			timeFrom: timeFrom?.toISOString(),
 			timeTo: new Date().toISOString(),
 		});
 
-		setTimeFrom(null);
+		setTimeFrom(null); // limpa o timer
 	}
 
 	const focusTimer = useTimer({
 		expiryTimestamp: new Date(),
 		onExpire: async () => {
 			if (timerState === TimerState.PAUSED) {
-				await handleEnd();
+				// se o timer estiver pausado
+				await handleEnd(); // finaliza o timer
 			}
 		},
 	});
 
 	const restTimer = useTimer({
-		expiryTimestamp: new Date(),
+		expiryTimestamp: new Date(), // data de expiração do timer
 	});
 
 	function handleAddMinutes(type: 'focus' | 'rest') {
 		if (type === 'focus') {
-			const currentValue = Number(focusInput.current?.value);
+			const currentValue = Number(focusInput.current?.value); //armazena o valor atual do input
 
 			if (focusInput.current) {
-				const value = currentValue + 5;
-				focusInput.current.value = String(value);
+				//se tiver um valor atual
+				const value = currentValue + 5; //soma o valor atual mais 5
+				focusInput.current.value = String(value); // coloca o valor no input
 
 				setTimers((oldValue) => ({
-					...oldValue, // pega o valor antigo
+					...oldValue, // pega o valor antigo, zero
 					focus: value, // valor novo
 				}));
 			}
@@ -103,41 +106,42 @@ function Focus() {
 
 	function handleCancel() {
 		setTimers({
+			//quando cancela, zera os valores do estado
 			focus: 0,
 			rest: 0,
 		});
 
-		setTimerState(TimerState.PAUSED);
+		setTimerState(TimerState.PAUSED); // pausa o timer
 
 		if (focusInput.current) {
-			focusInput.current.value = '';
+			focusInput.current.value = ''; // limpa o input
 		}
 
 		if (restInput.current) {
-			restInput.current.value = '';
+			restInput.current.value = ''; // limpa o input
 		}
 	}
 
 	function handleFocus() {
-		handleStart();
+		handleStart(); // inicia o timer
 
-		setTimerState(TimerState.FOCUS);
+		setTimerState(TimerState.FOCUS); // define o estado como foco
 	}
 
 	async function handleRest() {
-		await handleEnd();
+		await handleEnd(); // finaliza o timer
 
 		const now = new Date();
 
 		restTimer.restart(addSeconds(now, timers.rest * 60));
 
-		setTimerState(TimerState.REST);
+		setTimerState(TimerState.REST); // define o estado como descanso
 	}
 
 	function handleResume() {
-		handleStart();
+		handleStart(); // inicia o timer
 
-		setTimerState(TimerState.FOCUS);
+		setTimerState(TimerState.FOCUS); // define o estado como foco
 	}
 
 	return (
@@ -182,7 +186,7 @@ function Focus() {
 				</div>
 
 				<div className={styles.buttonGroup}>
-					{timerState === TimerState.PAUSED && (
+					{timerState === TimerState.PAUSED && ( //valor padrão do timerState é PAUSED
 						<Button
 							onClick={handleFocus}
 							disabled={timers.focus <= 0 || timers.rest <= 0}
