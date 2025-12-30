@@ -28,15 +28,15 @@ type HabitMetrics = {
 
 function Habits() {
 	const [habits, setHabits] = useState<Habit[]>([]);
-	const [metrics, _setMetricss] = useState<HabitMetrics>({} as HabitMetrics);
+	const [metrics, setMetrics] = useState<HabitMetrics>({} as HabitMetrics);
 	const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null); //null pq não tem nenhum habito selecionado
 	const nameInput = useRef<HTMLInputElement>(null);
 	const today = dayjs().startOf('day'); //pega o dia de hoje
 
+	//useMemo serve para memorizar os dados, evitando que eles sejam recalculados a cada renderização
 	const metricsInfo = useMemo(() => {
-		//useMemo serve para memorizar os dados, evitando que eles sejam recalculados a cada renderização
 		const numberOfMonthDays = today.endOf('month').get('date'); //pega o dia do mês
-		const numberOfDays = metrics?.completedDates //pega os dias completados
+		const numberOfDays = metrics?.completedDates
 			? metrics?.completedDates?.length
 			: 0;
 
@@ -50,11 +50,24 @@ function Habits() {
 			completedMonthPercent,
 			completedDatesPerMonth,
 		};
-	}, [metrics]);
+
+	}, [metrics, today]);
 
 	async function handleSelectedHabit(habit: Habit) {
 		setSelectedHabit(habit);
-		console.log(habit);
+
+		const { data } = await api.get<HabitMetrics>(
+			`/habits/${habit._id}/metrics`,
+			{
+				params: {
+					date: today.toISOString(),
+				},
+			},
+		);
+
+		console.log(data);
+
+		setMetrics(data);
 	}
 
 	async function loadHabits() {
@@ -79,14 +92,18 @@ function Habits() {
 		}
 	}
 
-	async function handleToggle(id: string) {
-		await api.patch(`/habits/${id}/toggle`);
+	async function handleToggle(habit: Habit) {
+		await api.patch(`/habits/${habit._id}/toggle`);
 
 		await loadHabits(); //recarrega depois de marcado
+		await handleSelectedHabit(habit)
 	}
 
 	async function handleRemove(id: string) {
 		await api.delete(`/habits/${id}`);
+
+		setMetrics({} as HabitMetrics);
+		setSelectedHabit(null)
 
 		await loadHabits(); //recarrega depois de deletado
 	}
@@ -125,7 +142,7 @@ function Habits() {
 									checked={item.completedDates.some(
 										(item) => item === today.toISOString(),
 									)}
-									onChange={async () => await handleToggle(item._id)}
+									onChange={async () => await handleToggle(item)}
 								/>
 								<TrashIcon onClick={async () => await handleRemove(item._id)} />
 							</div>
