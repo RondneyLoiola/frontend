@@ -16,3 +16,20 @@ button {
 button:hover {
     background-color: var(--info-hover);
 }
+
+.error {
+    background-color: var(--error);
+}
+
+.error:hover {
+    background-color: var(--error-hover);
+}
+
+.disabled {
+    background-color: var(--light);
+    cursor: not-allowed;
+}
+
+.disabled:hover {
+    background-color: var(--neutral);
+}
