@@ -1,6 +1,8 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: useEffect */
+/** biome-ignore-all lint/style/noNonNullAssertion: handleSelectMonth */
 /** biome-ignore-all lint/a11y/useKeyWithClickEvents: onClick in 'p' */
 
+import { Indicator } from '@mantine/core';
 import { Calendar } from '@mantine/dates';
 import { PaperPlaneRightIcon, TrashIcon } from '@phosphor-icons/react';
 import clsx from 'clsx';
@@ -50,22 +52,22 @@ function Habits() {
 			completedMonthPercent,
 			completedDatesPerMonth,
 		};
-
 	}, [metrics, today]);
 
-	async function handleSelectedHabit(habit: Habit) {
+	async function handleSelectedHabit(habit: Habit, currentMonth?: Date) {
 		setSelectedHabit(habit);
 
 		const { data } = await api.get<HabitMetrics>(
 			`/habits/${habit._id}/metrics`,
 			{
 				params: {
-					date: today.toISOString(),
+					//se não existe o currentMonth, passa o today
+					date: currentMonth
+						? currentMonth.toISOString()
+						: today.startOf('month').toISOString(),
 				},
 			},
 		);
-
-		console.log(data);
 
 		setMetrics(data);
 	}
@@ -96,16 +98,23 @@ function Habits() {
 		await api.patch(`/habits/${habit._id}/toggle`);
 
 		await loadHabits(); //recarrega depois de marcado
-		await handleSelectedHabit(habit)
+		await handleSelectedHabit(habit);
 	}
 
 	async function handleRemove(id: string) {
 		await api.delete(`/habits/${id}`);
 
 		setMetrics({} as HabitMetrics);
-		setSelectedHabit(null)
+		setSelectedHabit(null);
 
 		await loadHabits(); //recarrega depois de deletado
+	}
+
+	async function handleSelectMonth(date: Date | string) {
+		// Converte para Date se vier como string
+		const dateObject = typeof date === 'string' ? new Date(date) : date;
+
+		await handleSelectedHabit(selectedHabit!, dateObject);
 	}
 
 	useEffect(() => {
@@ -167,7 +176,29 @@ function Habits() {
 					</div>
 
 					<div className={styles.calendarContainer}>
-						<Calendar />
+						<Calendar
+							static
+							onMonthSelect={handleSelectMonth}
+							onNextMonth={handleSelectMonth}
+							onPreviousMonth={handleSelectMonth}
+							renderDay={(date) => {
+								const day = dayjs(date).date();
+								const isSameDate = metrics?.completedDates?.some(
+									(item) => dayjs(item).isSame(dayjs(date)),
+									// verifica se tem alguma data de completedDates que seja igual ao dia do calendário
+								);
+								return (
+									<Indicator
+										size={10}
+										color="var(--info"
+										offset={-2}
+										disabled={!isSameDate}
+									>
+										<div>{day}</div>
+									</Indicator>
+								);
+							}}
+						/>
 					</div>
 				</div>
 			)}
