@@ -1,8 +1,9 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: useEffect */
 import { Indicator } from '@mantine/core';
 import { Calendar } from '@mantine/dates';
-import { PlusIcon } from '@phosphor-icons/react';
+import { PlusIcon, TimerIcon } from '@phosphor-icons/react';
 import dayjs from 'dayjs';
+import 'dayjs/locale/pt-br';
 import utc from 'dayjs/plugin/utc';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTimer } from 'react-timer-hook';
@@ -97,7 +98,7 @@ function Focus() {
 	const focusTimer = useTimer({
 		expiryTimestamp: new Date(),
 		onExpire: async () => {
-			if (timerState === TimerState.FOCUS) {
+			if (timerState !== TimerState.PAUSED) {
 				await handleEnd(); // finaliza o timer
 			}
 		},
@@ -170,6 +171,8 @@ function Focus() {
 		restTimer.restart(addSeconds(now, timers.rest * 60));
 
 		setTimerState(TimerState.REST); // define o estado como descanso
+
+		loadFocusTimes(currentDate.toISOString());
 	}
 
 	function handleResume() {
@@ -337,19 +340,46 @@ function Focus() {
 					/>
 				</div>
 
+				<div className={styles.infoMetrics}>
+					<h3>{currentDate.locale('pt-br').format('DD [de] MMMM')}</h3>
+
+					<div className={styles.infoMetricsContainer}>
+						{focusTimes && focusTimes.length > 0 ? (
+							focusTimes.map((item) => (
+								<div key={item._id} className={styles.info}>
+									<div>
+										<TimerIcon />
+										<p>{`${dayjs.utc(item.timeFrom).format('HH:mm')} - ${dayjs.utc(item.timeTo).format('HH:mm')}`}</p>
+									</div>
+									<span>
+										{dayjs
+											.utc(item.timeTo)
+											.diff(dayjs.utc(item.timeFrom), 'minute')}{' '}
+										minutos
+									</span>
+								</div>
+							))
+						) : (
+							<div className={styles.info}>
+								<span>Nenhuma atividade registrada</span>
+							</div>
+						)}
+					</div>
+				</div>
+
 				<div className={styles.calendarContainer}>
 					<Calendar
 						getDayProps={(date) => ({
-							selected: dayjs.utc(date).isSame(dayjs.utc(currentDate), 'day'), // Adicione .utc() aqui
+							selected: dayjs.utc(date).isSame(dayjs.utc(currentDate), 'day'),
 							onClick: async () => await handleSelectDay(date),
 						})}
 						onMonthSelect={handleSelectMonth}
 						onNextMonth={handleSelectMonth}
 						onPreviousMonth={handleSelectMonth}
 						renderDay={(date) => {
-							const day = dayjs.utc(date).date(); // Use .utc() aqui
+							const day = dayjs.utc(date).date();
 							const isSameDate = metricsInfoByMonth.completedDates.some(
-								(item) => dayjs.utc(item).isSame(dayjs.utc(date), 'day'), // Use .utc() em ambos
+								(item) => dayjs.utc(item).isSame(dayjs.utc(date), 'day'),
 							);
 							return (
 								<Indicator
