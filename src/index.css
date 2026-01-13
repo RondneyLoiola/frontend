@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+:root {
+    --bg-primary: rgb(255, 255, 255);
+    --bg-secondary: #E5E7EB;
+    --border-color: #E0E0E0
+}
+
+
+body {
+    font-family: 'Roboto', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-secondary);
+    overflow: hidden;
+}
