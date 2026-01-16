@@ -1,60 +1,119 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { z } from "zod";
+import api from "../services/api";
 
 const expenseSchema = z.object({
-	expense: z.string().min(1, "Descrição é obrigatória"),
+	name: z.string().min(1, "Descrição é obrigatória"),
 	amount: z.coerce.number().positive("Valor deve ser positivo"),
 	category: z.string().min(1, "Categoria é obrigatória"),
-	date: z.coerce.date(),
+	date: z.string().min(1, "Data é obrigatória"),
 });
 
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
+interface CategoriesData {
+	_id: string; // Adicionado o _id
+	name: string;
+	color: string;
+}
+
 export default function NewExpense() {
+	const [categories, setCategories] = useState<CategoriesData[]>([]);
+
+	useEffect(() => {
+		const getCategories = async () => {
+			try {
+				const { data } = await api.get("/categories");
+
+				setCategories(data);
+			} catch (error) {
+				console.error("Erro ao buscar categorias:", error);
+				toast.error("Erro ao carregar categorias!");
+			}
+		};
+
+		getCategories();
+	}, []);
+
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
 		reset,
-	} = useForm<z.input<typeof expenseSchema>, z.output<typeof expenseSchema>, z.output<typeof expenseSchema>>({
+		formState: { errors },
+	} = useForm<
+		z.input<typeof expenseSchema>,
+		z.output<typeof expenseSchema>,
+		z.output<typeof expenseSchema>
+	>({
 		resolver: zodResolver(expenseSchema),
+		defaultValues: {
+			name: "",
+			amount: "",
+			category: "",
+			date: new Date().toISOString().split("T")[0],
+		},
 	});
 
-	function onSubmit(data: ExpenseFormData) {
-		console.log("Despesa adicionada:", data);
-		alert(`Despesa de R$ ${data.amount.toFixed(2)} adicionada com sucesso!`);
-		reset();
-	}
+	const onSubmit = async (data: ExpenseFormData) => {
+		try {
+			const { status } = await api.post(
+				"/expenses",
+				{
+					name: data.name,
+					amount: data.amount,
+					category: data.category, // Agora envia o _id da categoria
+					date: new Date(data.date).toISOString(), // Converte para formato ISO
+				},
+				{
+					validateStatus: () => true,
+				},
+			);
+
+			if (status === 201) {
+				toast.success("Despesa adicionada com sucesso!");
+				reset();
+			} else {
+				toast.error("Erro ao adicionar despesa!");
+			}
+		} catch (error) {
+			console.error("Erro ao adicionar despesa:", error);
+			toast.error("Erro no servidor! Tente novamente.");
+		}
+	};
 
 	return (
-		<div className="w-[70%] flex items-center justify-center border border-(--border-color)">
+		<div className="w-[70%] flex items-center justify-center border border-gray-200">
 			<div className="w-full bg-white rounded-lg shadow-md p-8">
 				<h2 className="text-2xl font-bold text-gray-800 mb-6">
 					Adicionar Despesa
 				</h2>
 
-				<div className="space-y-6">
+				<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 					{/* Descrição */}
 					<div>
 						<label
-							htmlFor="expense"
+							htmlFor="name"
 							className="block text-sm font-medium text-gray-700 mb-2"
 						>
 							Descrição
 						</label>
 						<input
-							id="expense"
+							id="name"
 							type="text"
 							placeholder="Ex: Supermercado"
-							{...register("expense")}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+							{...register("name")}
+							className={`${
+								errors.name
+									? "border-2 border-red-500"
+									: "border border-gray-300"
+							} w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition`}
 						/>
-						{errors.expense && (
-							<p className="mt-1 text-sm text-red-600">
-								{errors.expense.message}
-							</p>
+						{errors.name && (
+							<p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
 						)}
 					</div>
 
@@ -69,12 +128,17 @@ export default function NewExpense() {
 						<input
 							id="amount"
 							type="number"
+							placeholder="0.00"
 							step="0.01"
 							{...register("amount")}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+							className={`${
+								errors.amount
+									? "border-2 border-red-500"
+									: "border border-gray-300"
+							} w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition`}
 						/>
 						{errors.amount && (
-							<p className="mt-1 text-sm text-red-600">
+							<p className="mt-1 text-sm text-red-500">
 								{errors.amount.message}
 							</p>
 						)}
@@ -91,19 +155,21 @@ export default function NewExpense() {
 						<select
 							id="category"
 							{...register("category")}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition bg-white"
+							className={`${
+								errors.category
+									? "border-2 border-red-500"
+									: "border border-gray-300"
+							} w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition bg-white`}
 						>
 							<option value="">Selecione uma categoria</option>
-							<option value="Alimentação">Alimentação</option>
-							<option value="Transporte">Transporte</option>
-							<option value="Lazer">Lazer</option>
-							<option value="Saúde">Saúde</option>
-							<option value="Educação">Educação</option>
-							<option value="Moradia">Moradia</option>
-							<option value="Outros">Outros</option>
+							{categories.map((category) => (
+								<option key={category._id} value={category._id}>
+									{category.name}
+								</option>
+							))}
 						</select>
 						{errors.category && (
-							<p className="mt-1 text-sm text-red-600">
+							<p className="mt-1 text-sm text-red-500">
 								{errors.category.message}
 							</p>
 						)}
@@ -121,24 +187,26 @@ export default function NewExpense() {
 							id="date"
 							type="date"
 							{...register("date")}
-							defaultValue={new Date().toISOString().split("T")[0]}
-							className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+							className={`${
+								errors.date
+									? "border-2 border-red-500"
+									: "border border-gray-300"
+							} w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition`}
 						/>
 						{errors.date && (
-							<p className="mt-1 text-sm text-red-600">{errors.date.message}</p>
+							<p className="mt-1 text-sm text-red-500">{errors.date.message}</p>
 						)}
 					</div>
 
 					{/* Botão de Submit */}
 					<button
 						type="submit"
-						onClick={handleSubmit(onSubmit)}
 						className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2"
 					>
-						<Plus size={20}/>
+						<Plus size={20} />
 						Adicionar Despesa
 					</button>
-				</div>
+				</form>
 			</div>
 		</div>
 	);

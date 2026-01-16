@@ -1,20 +1,87 @@
 import { BookText, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import api from "../services/api";
+import { formatDate } from "../utils/formatDate";
+
+interface ExpenseFormData {
+	name: string;
+	amount: number;
+	category: {
+		_id: string;
+		name: string;
+		color: string
+	};
+	date: string;
+}
 
 export function RecentExpense() {
-	return (
-		<div className="p-8 w-full bg-(--bg-primary) rounded-lg border border-(--border-color)">
-			<div className="flex justify-between items-center">
-				<h2 className="text-2xl font-bold text-gray-800">Despesas Recentes</h2>
-				<button type="button" className="text-red-500 text-center flex gap-2 font-bold" >
-					<Trash2 size={20} />
-					Limpar Tudo
-				</button>
-			</div>
+	const [expenses, setExpenses] = useState<ExpenseFormData[]>([])
 
-            <div className="flex justify-center items-center flex-col gap-4 text-(--bg-secondary) mt-20">
-                <BookText size={60}/>
-                <span className="font-bold text-2xl">Nenhuma despesa adicionada</span>
+	useEffect(() => {
+		const getExpenses = async () => {
+			try {
+				const { data } = await api.get('/expenses/me')
+
+				setExpenses(data.expenses)
+				console.log(data.expenses)
+			} catch (error) {
+				console.error('Erro ao buscar despesas:', error);
+			}
+		}
+
+		getExpenses()
+	}, [])
+
+	return (
+    <div className="p-6 max-h-screen w-full max-w-2xl bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-gray-900">Despesas Recentes</h2>
+        <button 
+          type="button" 
+          className="text-red-500 text-sm flex items-center gap-2 font-medium hover:text-red-600 transition-colors"
+        >
+          <Trash2 size={16} />
+          Limpar Tudo
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {expenses.length > 0 ? (
+          expenses.map((expense) => (
+            <div 
+              key={expense.name} 
+              className="w-full flex justify-between items-center border border-gray-200 p-4 rounded-xl hover:bg-gray-100 transition-colors"
+            >
+              <div className="flex items-center gap-4">
+                {/* {getCategoryIcon(expense.category.icon, expense.category.color)} */}
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-0.5">{expense.name}</h3>
+                  <p className="text-sm text-gray-500">
+                    {expense.category.name} • {formatDate(expense.date)}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <span className="font-bold text-gray-900">
+                  R$ {expense.amount.toFixed(2).replace('.', ',')}
+                </span>
+                <button 
+                  type="button" 
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-red-200 text-red-500 hover:text-red-700 transition-colors p-1"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
             </div>
-		</div>
-	);
+          ))
+        ) : (
+          <div className="flex justify-center items-center flex-col gap-4 text-gray-400 py-20">
+            <BookText size={48} strokeWidth={1.5} />
+            <span className="font-semibold text-lg">Nenhuma despesa adicionada</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

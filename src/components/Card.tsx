@@ -1,14 +1,14 @@
 interface CardProps {
 	title: string;
 	subtitle: string;
-	value: string;
+	value: string | number;
 	icon: React.ReactNode;
 	className: string;
 }
 
 export function Card({ title, subtitle, value, icon, className }: CardProps) {
 	return (
-		<div className="pt-6">
+		<div className="pt-6 pb-4">
 			<div className="bg-(--bg-primary) rounded-md flex w-80 justify-between px-6 py-6 border border-(--border-color)">
 				<div className="flex flex-col gap-2">
 					<p>{title}</p>
