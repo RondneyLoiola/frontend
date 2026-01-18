@@ -1,66 +1,70 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 export type UserData = {
-    id: string;
-    name: string;
-    token: string;
-}
+	id: string;
+	name: string;
+	token: string;
+	user: {
+		name: string;
+        email: string;
+	};
+};
 
 interface UserProviderProps {
-    children: React.ReactNode
+	children: React.ReactNode;
 }
 
 type UserContextType = {
-    userInfo: UserData | null;
-    loading: boolean;
-    putUserData: (userInfo: UserData) => void;
-    logout: () => void;
-}
+	userInfo: UserData | null;
+	loading: boolean;
+	putUserData: (userInfo: UserData) => void;
+	logout: () => void;
+};
 
-export const userLocalStorageKey = `${import.meta.env.VITE_LOCALSTORAGE_KEY}:userData`
+export const userLocalStorageKey = `${import.meta.env.VITE_LOCALSTORAGE_KEY}:userData`;
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider = ({children}: UserProviderProps) => {
-    const [userInfo, setUserInfo] = useState<UserData | null>(null);
+export const UserProvider = ({ children }: UserProviderProps) => {
+	const [userInfo, setUserInfo] = useState<UserData | null>(null);
 
-    const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(true);
 
-    const putUserData = (userInfo: UserData) => {
-        setUserInfo(userInfo);
-        localStorage.setItem(userLocalStorageKey, JSON.stringify(userInfo));
-    }
+	const putUserData = (userInfo: UserData) => {
+		setUserInfo(userInfo);
+		localStorage.setItem(userLocalStorageKey, JSON.stringify(userInfo));
+	};
 
-    const logout = () => {
-        setUserInfo(null);
-        localStorage.removeItem(userLocalStorageKey);
-    }
+	const logout = () => {
+		setUserInfo(null);
+		localStorage.removeItem(userLocalStorageKey);
+	};
 
-    useEffect(() => {
-        const userInfoLocalStorage = localStorage.getItem(userLocalStorageKey);
+	useEffect(() => {
+		const userInfoLocalStorage = localStorage.getItem(userLocalStorageKey);
 
-        if(userInfoLocalStorage){
-            setUserInfo(JSON.parse(userInfoLocalStorage));
-        }
-        
-        setLoading(false);
-    }, [])
+		if (userInfoLocalStorage) {
+			setUserInfo(JSON.parse(userInfoLocalStorage));
+		}
 
-    return (
-        <UserContext.Provider value={{userInfo, loading, putUserData, logout}}>
-            {children}
-        </UserContext.Provider>
-    )
-}
+		setLoading(false);
+	}, []);
+
+	return (
+		<UserContext.Provider value={{ userInfo, loading, putUserData, logout }}>
+			{children}
+		</UserContext.Provider>
+	);
+};
 
 export function useUser() {
-    const context = useContext(UserContext);
+	const context = useContext(UserContext);
 
-    if(!context) {
-        throw new Error('useUser deve ser usado dentro de um UserProvider');  
-    }
+	if (!context) {
+		throw new Error("useUser deve ser usado dentro de um UserProvider");
+	}
 
-    return context
+	return context;
 }
 
-export default UserProvider
+export default UserProvider;

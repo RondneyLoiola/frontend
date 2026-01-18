@@ -1,16 +1,17 @@
 import { Calculator, LogOut, Tags } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useUser } from "../hooks/auth";
 
 export function SiderBar() {
 	const navigate = useNavigate();
 	const { logout } = useUser();
+	const { pathname } = useLocation();
 
 	const handleLogout = () => {
 		if (window.confirm("Deseja realmente sair?")) {
 			logout();
 		}
-		return
+		return;
 	};
 
 	return (
@@ -21,7 +22,7 @@ export function SiderBar() {
 					<button
 						type="button"
 						onClick={() => navigate("/despesas")}
-						className="flex items-center gap-3 p-6 w-full transition-all duration-200 hover:bg-green-100 text-left group"
+						className={`${pathname === "/despesas" ? "bg-green-100 text-green-800" : ""} flex items-center gap-3 p-6 w-full transition-all duration-200 hover:bg-green-100 text-left group`}
 					>
 						<Calculator
 							size={20}
@@ -35,7 +36,7 @@ export function SiderBar() {
 					<button
 						onClick={() => navigate("/categorias")}
 						type="button"
-						className="flex items-center gap-3 p-6 transition-all duration-200 hover:bg-green-100 text-left w-full group"
+						className={`${pathname === "/categorias" ? "bg-green-100 text-green-800" : ""} flex items-center gap-3 p-6 transition-all duration-200 hover:bg-green-100 text-left w-full group`}
 					>
 						<Tags
 							size={20}
