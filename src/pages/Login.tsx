@@ -59,10 +59,18 @@ export default function LoginPage() {
 		} 
 	};
 
+	// Função para login com Google
 	const handleGoogleLogin = async () => {
 		try {
 			// Abre o popup do Google para autenticação
 			const result = await signInWithPopup(firebaseAuth, googleAuthProvider);
+			
+			console.log("📸 Dados do usuário Google:", {
+				email: result.user.email,
+				name: result.user.displayName,
+				photoURL: result.user.photoURL,
+				uid: result.user.uid
+			});
 			
 			// Envia os dados para seu backend validar e criar sessão
 			const { data: userData } = await toast.promise(
@@ -79,8 +87,12 @@ export default function LoginPage() {
 				}
 			);
 
+			console.log("✅ Dados recebidos do backend:", userData);
+
+			// Salva os dados do usuário no contexto e localStorage
 			putUserData(userData);
 
+			// Redireciona para a página de despesas
 			setTimeout(() => {
 				navigate("/despesas");
 			}, 2300);

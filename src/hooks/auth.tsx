@@ -6,7 +6,8 @@ export type UserData = {
 	token: string;
 	user: {
 		name: string;
-        email: string;
+		email: string;
+		photoURL?: string; // Opcional porque nem todos usuários têm foto
 	};
 };
 
@@ -27,7 +28,6 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: UserProviderProps) => {
 	const [userInfo, setUserInfo] = useState<UserData | null>(null);
-
 	const [loading, setLoading] = useState(true);
 
 	const putUserData = (userInfo: UserData) => {
