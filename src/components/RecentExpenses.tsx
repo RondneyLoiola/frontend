@@ -78,7 +78,7 @@ export function RecentExpense({ refreshTrigger }: RecentExpenseProps) {
 					expenses.map((expense) => (
 						<div
 							key={expense._id}
-							className="w-full flex justify-between items-center border border-gray-200 p-4 rounded-xl hover:bg-gray-100 transition-colors"
+							className="w-full flex justify-between items-center border border-gray-200 p-4 rounded-md hover:bg-gray-100 transition-colors"
 						>
 							<div className="flex items-center gap-4">
 								<div>

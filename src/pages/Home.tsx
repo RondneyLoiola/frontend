@@ -66,7 +66,7 @@ function Home() {
 	};
 
 	return (
-		<div className="w-full flex flex-col items-start md:ml-80 pt-6">
+		<div className="w-full flex flex-col items-start md:ml-80 pt-4">
 			<h1 className="font-bold text-3xl">Calculadora de Despesas</h1>
 			<p className="text-gray-600 mt-2">
 				Adicione e gerencia suas despesas facilmente

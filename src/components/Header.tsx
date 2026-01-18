@@ -17,7 +17,7 @@ export function Header() {
 	const hasGooglePhoto = userInfo?.user?.photoURL;
 
 	return (
-		<header className="w-full bg-(--bg-primary) py-2 px-6 border-b border-gray-200">
+		<header className="w-full bg-(--bg-primary) px-6 border-b border-gray-200">
 			<div>
 				<div className="flex justify-between items-center h-16">
 					{/* Logo e Nome */}
