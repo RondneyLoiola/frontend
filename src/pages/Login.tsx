@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 import { z } from "zod";
 import { useUser } from "../hooks/auth";
 import { api } from "../services/api";
+import { signInWithPopup } from "firebase/auth";
+import { firebaseAuth, googleAuthProvider } from '../config/firebase'
 
 interface UserType {
 	email: string;
@@ -55,6 +57,38 @@ export default function LoginPage() {
 		} catch (error) {
 			console.error("Email na solicitação", error);
 		} 
+	};
+
+	const handleGoogleLogin = async () => {
+		try {
+			// Abre o popup do Google para autenticação
+			const result = await signInWithPopup(firebaseAuth, googleAuthProvider);
+			
+			// Envia os dados para seu backend validar e criar sessão
+			const { data: userData } = await toast.promise(
+				api.post("/session/google", {
+					email: result.user.email,
+					name: result.user.displayName,
+					photoURL: result.user.photoURL,
+					uid: result.user.uid,
+				}),
+				{
+					pending: "Autenticando com Google...",
+					success: "Seja Bem-Vindo(a)!",
+					error: "Erro ao fazer login com Google",
+				}
+			);
+
+			putUserData(userData);
+
+			setTimeout(() => {
+				navigate("/despesas");
+			}, 2300);
+
+		} catch (error) {
+			console.error("Erro no login com Google:", error);
+			toast.error("Erro ao fazer login com Google");
+		}
 	};
 
 	return (
@@ -140,6 +174,7 @@ export default function LoginPage() {
 							<div className="flex items-center justify-center">
 								<button
 									type="button"
+									onClick={handleGoogleLogin}
 									className="flex items-center w-20 justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
 								>
 									<svg className="w-5 h-5" viewBox="0 0 24 24">

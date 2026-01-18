@@ -6,6 +6,9 @@ import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { z } from "zod";
 import { api } from "../services/api";
+import { useUser } from "../hooks/auth";
+import { signInWithPopup } from "firebase/auth";
+import { firebaseAuth, googleAuthProvider } from '../config/firebase'
 
 interface UserType {
 	name: string;
@@ -16,6 +19,8 @@ interface UserType {
 
 export default function SignupPage() {
 	const navigate = useNavigate();
+	const { putUserData } = useUser();
+
 	const schema = z
 		.object({
 			name: z.string().min(1, "Nome é obrigatório"),
@@ -70,8 +75,38 @@ export default function SignupPage() {
 		} catch (_error) {
 			toast.error("Falha no Sistema! Tente novamente.");
 		}
+	};
 
-		
+	const handleGoogleLogin = async () => {
+		try {
+			// Abre o popup do Google para autenticação
+			const result = await signInWithPopup(firebaseAuth, googleAuthProvider);
+			
+			// Envia os dados para seu backend validar e criar sessão
+			const { data: userData } = await toast.promise(
+				api.post("/session/google", {
+					email: result.user.email,
+					name: result.user.displayName,
+					photoURL: result.user.photoURL,
+					uid: result.user.uid,
+				}),
+				{
+					pending: "Autenticando com Google...",
+					success: "Seja Bem-Vindo(a)!",
+					error: "Erro ao fazer login com Google",
+				}
+			);
+
+			putUserData(userData);
+
+			setTimeout(() => {
+				navigate("/despesas");
+			}, 2300);
+
+		} catch (error) {
+			console.error("Erro no login com Google:", error);
+			toast.error("Erro ao fazer login com Google");
+		}
 	};
 
 	return (
@@ -196,6 +231,7 @@ export default function SignupPage() {
 
 							<div className="flex items-center justify-center">
 								<button
+									onClick={handleGoogleLogin}
 									type="button"
 									className="flex items-center w-20 justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
 								>
