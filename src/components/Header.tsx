@@ -4,7 +4,6 @@ import { useUser } from "../hooks/auth";
 
 export function Header() {
 	const { userInfo } = useUser();
-	console.log(userInfo);
 
 	const getInitials = (name: string) => {
 		const names = name.split(" ");

@@ -16,19 +16,22 @@ const expenseSchema = z.object({
 type ExpenseFormData = z.infer<typeof expenseSchema>;
 
 interface CategoriesData {
-	_id: string; // Adicionado o _id
+	_id: string;
 	name: string;
 	color: string;
 }
 
-export default function NewExpense() {
+interface NewExpenseProps {
+	onExpenseCreated?: () => void;
+}
+
+export default function NewExpense({ onExpenseCreated }: NewExpenseProps) {
 	const [categories, setCategories] = useState<CategoriesData[]>([]);
 
 	useEffect(() => {
 		const getCategories = async () => {
 			try {
 				const { data } = await api.get("/categories");
-
 				setCategories(data);
 			} catch (error) {
 				console.error("Erro ao buscar categorias:", error);
@@ -65,8 +68,8 @@ export default function NewExpense() {
 				{
 					name: data.name,
 					amount: data.amount,
-					category: data.category, // Agora envia o _id da categoria
-					date: new Date(data.date).toISOString(), // Converte para formato ISO
+					category: data.category,
+					date: new Date(data.date).toISOString(),
 				},
 				{
 					validateStatus: () => true,
@@ -76,6 +79,11 @@ export default function NewExpense() {
 			if (status === 201) {
 				toast.success("Despesa adicionada com sucesso!");
 				reset();
+				
+				// Avisa o componente pai que uma despesa foi criada
+				if (onExpenseCreated) {
+					onExpenseCreated();
+				}
 			} else {
 				toast.error("Erro ao adicionar despesa!");
 			}

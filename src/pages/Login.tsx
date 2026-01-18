@@ -49,7 +49,7 @@ export default function LoginPage() {
 				
 			);
 			putUserData(userData);
-			console.log(userData);
+
 
 			setTimeout(() => {
 				navigate("/despesas");
@@ -65,13 +65,6 @@ export default function LoginPage() {
 			// Abre o popup do Google para autenticação
 			const result = await signInWithPopup(firebaseAuth, googleAuthProvider);
 			
-			console.log("📸 Dados do usuário Google:", {
-				email: result.user.email,
-				name: result.user.displayName,
-				photoURL: result.user.photoURL,
-				uid: result.user.uid
-			});
-			
 			// Envia os dados para seu backend validar e criar sessão
 			const { data: userData } = await toast.promise(
 				api.post("/session/google", {
@@ -86,8 +79,6 @@ export default function LoginPage() {
 					error: "Erro ao fazer login com Google",
 				}
 			);
-
-			console.log("✅ Dados recebidos do backend:", userData);
 
 			// Salva os dados do usuário no contexto e localStorage
 			putUserData(userData);

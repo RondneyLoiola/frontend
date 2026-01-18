@@ -25,7 +25,6 @@ interface SummaryData {
 
 function Home() {
 	const [_expenses, setExpenses] = useState<ExpenseFormData[]>([]);
-
 	const [summary, setSummary] = useState<SummaryData>({
 		totalAmount: 0,
 		totalExpenses: 0,
@@ -37,11 +36,13 @@ function Home() {
 	);
 	const [selectedYear, _setSelectedYear] = useState(new Date().getFullYear());
 
+	// Estado para forçar atualização da lista de despesas
+	const [refreshTrigger, setRefreshTrigger] = useState(0);
+
 	useEffect(() => {
 		const getMyExpenses = async () => {
 			try {
 				const url = `/expenses/me?month=${selectedMonth}&year=${selectedYear}`;
-
 				const { data } = await api.get(url);
 
 				if (!data) {
@@ -56,10 +57,16 @@ function Home() {
 		};
 
 		getMyExpenses();
-	}, [selectedMonth, selectedYear]);
+	}, [selectedMonth, selectedYear, refreshTrigger]);
+
+	// Função chamada quando uma nova despesa é criada
+	const handleExpenseCreated = () => {
+		// Atualiza o trigger para forçar a atualização dos dados
+		setRefreshTrigger((prev) => prev + 1);
+	};
 
 	return (
-		<div className="w-full flex flex-col items-start md:ml-80  pt-6">
+		<div className="w-full flex flex-col items-start md:ml-80 pt-6">
 			<h1 className="font-bold text-3xl">Calculadora de Despesas</h1>
 			<p className="text-gray-600 mt-2">
 				Adicione e gerencia suas despesas facilmente
@@ -95,8 +102,8 @@ function Home() {
 				</div>
 
 				<div className="flex gap-3">
-					<NewExpense />
-					<RecentExpense />
+					<NewExpense onExpenseCreated={handleExpenseCreated} />
+					<RecentExpense refreshTrigger={refreshTrigger} />
 				</div>
 			</div>
 		</div>

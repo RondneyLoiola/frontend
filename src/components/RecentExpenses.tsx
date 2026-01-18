@@ -16,7 +16,11 @@ interface ExpenseFormData {
 	date: string;
 }
 
-export function RecentExpense() {
+interface RecentExpenseProps {
+	refreshTrigger?: number;
+}
+
+export function RecentExpense({ refreshTrigger }: RecentExpenseProps) {
 	const [expenses, setExpenses] = useState<ExpenseFormData[]>([]);
 
 	useEffect(() => {
@@ -31,13 +35,11 @@ export function RecentExpense() {
 		};
 
 		getExpenses();
-	}, []);
+	}, [refreshTrigger]);
 
 	const deleteExpense = async (expenseId: string) => {
 		try {
 			await api.delete(`/expenses/${expenseId}`);
-
-			// Remove a despesa localmente
 			setExpenses(expenses.filter((exp) => exp._id !== expenseId));
 			toast.success("Despesa deletada com sucesso!");
 		} catch (_error) {
@@ -84,9 +86,11 @@ export function RecentExpense() {
 										{expense.name}
 									</h3>
 									<div className="flex gap-1 text-sm text-gray-500">
-                    <p style={{ color: expense.category.color }} className="font-bold">{expense.category.name}</p>
-                    •
-                    <p>{formatDate(expense.date)}</p>
+										<p style={{ color: expense.category.color }} className="font-bold">
+											{expense.category.name}
+										</p>
+										•
+										<p>{formatDate(expense.date)}</p>
 									</div>
 								</div>
 							</div>
