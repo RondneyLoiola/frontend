@@ -143,6 +143,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 **Rondney Loiola**
 
 - GitHub: [@RondneyLoiola](https://github.com/RondneyLoiola)
+- LinkedIn: https://www.linkedin.com/in/rondneyloiola/
 
 ## 📞 Contato
 
