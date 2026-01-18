@@ -2,9 +2,13 @@ import { Navigate, Outlet } from "react-router";
 import { useUser } from "../hooks/auth";
 
 const PrivateRoutes = () => {
-	const { userInfo } = useUser();
+	const { userInfo, loading } = useUser();
 
-	if (!userInfo) {
+	if (loading) {
+		return <div>Carregando...</div>;
+	}
+
+	if (!userInfo || !userInfo.token) {
 		return <Navigate to="/entrar" replace />;
 	}
 

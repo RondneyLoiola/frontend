@@ -1,8 +1,17 @@
-import { Calculator, History, LogOut, Tags } from "lucide-react";
+import { Calculator, LogOut, Tags } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useUser } from "../hooks/auth";
 
 export function SiderBar() {
 	const navigate = useNavigate();
+	const { logout } = useUser();
+
+	const handleLogout = () => {
+		if (window.confirm("Deseja realmente sair?")) {
+			logout();
+		}
+		return
+	};
 
 	return (
 		<div className="h-screen bg-(--bg-primary)">
@@ -24,20 +33,6 @@ export function SiderBar() {
 					</button>
 
 					<button
-						onClick={() => navigate("/historico")}
-						type="button"
-						className="flex items-center gap-3 p-6 transition-all duration-200 hover:bg-green-100  text-left w-full group"
-					>
-						<History
-							size={20}
-							className="group-hover:text-green-800 transition-colors"
-						/>
-						<span className="group-hover:text-green-800 transition-colors">
-							Histórico
-						</span>
-					</button>
-
-					<button
 						onClick={() => navigate("/categorias")}
 						type="button"
 						className="flex items-center gap-3 p-6 transition-all duration-200 hover:bg-green-100 text-left w-full group"
@@ -52,6 +47,7 @@ export function SiderBar() {
 					</button>
 
 					<button
+						onClick={handleLogout}
 						type="button"
 						className="flex items-center gap-3 px-7 py-6 transition-all duration-200 hover:bg-red-900/20 text-left w-full group  text-red-400"
 					>
